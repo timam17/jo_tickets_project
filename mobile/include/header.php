@@ -1,9 +1,11 @@
 <?php 
 session_start(); 
 
+// Récupération des informations de session
 $user = $_SESSION['user'] ?? null;
 $user_id = $_SESSION['user_id'] ?? null; 
 
+// Vérification de la présence du token
 if (isset($_SESSION['token'])) {
     $token = $_SESSION['token'];
 }
@@ -17,15 +19,15 @@ if (isset($_SESSION['token'])) {
     <title>Mon Site</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body{
-            background-color:rgb(26, 27, 29);
+        body {
+            background-color: rgb(26, 27, 29);
         }
 
         .navbar {
             position: fixed;
             top: 0;
             width: 100%;
-            z-index: 1030; /* Assurez-vous que le navbar est au-dessus du contenu */
+            z-index: 1030; /* Assurez-vous que la barre de navigation soit au-dessus du contenu */
         }
 
         .navbar-brand img {
@@ -35,17 +37,17 @@ if (isset($_SESSION['token'])) {
         }
 
         .custom-btn-night {
-            background-color:rgba(13, 27, 42, 0); /* bleu nuit foncé */
+            background-color: rgba(13, 27, 42, 0); /* Bleu nuit foncé */
             border: none;
             transition: background-color 0.3s ease;
         }
 
         .custom-btn-night:hover {
-            background-color:rgb(13, 27, 42); /* un peu plus clair au hover */
+            background-color: rgb(13, 27, 42); /* Couleur plus claire au survol */
         }
 
         .custom-btn-night:active {
-            background-color: rgb(13, 27, 42); /* rouge lors du clic */
+            background-color: rgb(13, 27, 42); /* Couleur lors du clic */
         }
 
         @media (max-width: 767px) {
@@ -85,10 +87,10 @@ if (isset($_SESSION['token'])) {
                             <a class="nav-link" href="#">Bienvenue, <?= htmlspecialchars($user) ?> !</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link btn custom-btn-night text-white ms-2" href="../frontend/mes_tickets.php">Mes tickets</a>
+                            <a class="nav-link btn custom-btn-night text-white ms-2" href="../frontend/mes_tickets.php">Mes billets</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link btn btn-danger text-white ms-2" href="../include/logout.php">Déconnexion</a>
+                            <a class="nav-link btn btn-danger text-white ms-2" href="../include/logout.php">Se déconnecter</a>
                         </li>
                     <?php else: ?>
                         <li class="nav-item">
@@ -100,4 +102,5 @@ if (isset($_SESSION['token'])) {
         </div>
     </nav>
 </header>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
