@@ -17,7 +17,7 @@ const getEvents = (req, res) => {
   });
 };
 
-// Ajouter un nouvel événement
+ // Ajouter un nouvel événement
 const createEvent = (req, res) => {
   const { start, stadium_id, team_home_id, team_away_id, score, winner_id } = req.body;
 

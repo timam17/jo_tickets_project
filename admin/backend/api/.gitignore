@@ -7,7 +7,7 @@ node_modules/
 # Système d'exploitation
 .DS_Store
 
-# Fichiers d'éditeur
+ # Fichiers d'éditeur
 .vscode/
 .idea/
 
