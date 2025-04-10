@@ -1,45 +1,44 @@
 <?php
 include_once '../include/header.php';
-$message = '';
-
+$notification = ''; // Changer le nom de la variable de message
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $username = trim($_POST['username']);
-    $email = trim($_POST['email']);
-    $password = trim($_POST['password']);
+    $user_name = trim($_POST['user_name']); // Changer 'username' en 'user_name'
+    $user_email = trim($_POST['user_email']); // Changer 'email' en 'user_email'
+    $user_password = trim($_POST['user_password']); // Changer 'password' en 'user_password'
 
-    if (empty($username) || empty($email) || empty($password)) {
-        $message = "Tous les champs sont obligatoires.";
+    if (empty($user_name) || empty($user_email) || empty($user_password)) {
+        $notification = "Tous les champs sont nécessaires."; // Message modifié
     } else {
-        // URL de votre API REST
-        $url = 'http://localhost:3000/register';
+        // URL de l'API pour l'inscription
+        $api_url = 'http://localhost:3000/register'; // Renommer l'url
 
-        // Données à envoyer en JSON
-        $data = json_encode([
-            "username" => $username,
-            "email" => $email,
-            "password" => $password
+        // Préparer les données à envoyer en JSON
+        $request_data = json_encode([
+            "username" => $user_name,
+            "email" => $user_email,
+            "password" => $user_password
         ]);
 
-        // Initialisation de cURL
-        $ch = curl_init($url);
+        // Initialisation de la requête cURL
+        $ch = curl_init($api_url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
         curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $request_data);
 
-        // Exécution de la requête
+        // Exécuter la requête
         $response = curl_exec($ch);
-        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $http_status = curl_getinfo($ch, CURLINFO_HTTP_CODE); // Renommer $http_code en $http_status
         curl_close($ch);
 
-        // Gestion des réponses
-        if ($http_code == 201) {
-            $_SESSION['user'] = $username; // Stocker l'utilisateur en session
-            header("Location: index.php"); // Redirection
+        // Gérer les réponses de l'API
+        if ($http_status == 201) {
+            $_SESSION['user'] = $user_name; // Stocker l'utilisateur dans la session
+            header("Location: index.php"); // Rediriger l'utilisateur après inscription
             exit();
         } else {
-            $message = "Erreur : " . $response;
+            $notification = "Erreur : " . $response; // Message d'erreur modifié
         }
     }
 }
@@ -50,30 +49,30 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inscription</title>
+    <title>Inscription Utilisateur</title> <!-- Titre modifié -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
     <div class="d-flex justify-content-center align-items-center vh-100">
     <div class="card p-4" style="width: 350px;">
-        <h2 class="text-center">Inscription</h2>
-        <?php if ($message): ?>
-            <div class="alert alert-danger"><?= htmlspecialchars($message) ?></div>
+        <h2 class="text-center">Formulaire d'Inscription</h2> <!-- Modifié le titre -->
+        <?php if ($notification): ?> <!-- Changer 'message' en 'notification' -->
+            <div class="alert alert-danger"><?= htmlspecialchars($notification) ?></div>
         <?php endif; ?>
         <form method="POST">
             <div class="mb-3">
-                <label for="username" class="form-label">Nom d'utilisateur</label>
-                <input type="text" name="username" id="username" class="form-control" required>
+                <label for="user_name" class="form-label">Nom d'utilisateur</label> <!-- 'username' modifié -->
+                <input type="text" name="user_name" id="user_name" class="form-control" required>
             </div>
             <div class="mb-3">
-                <label for="email" class="form-label">Email</label>
-                <input type="email" name="email" id="email" class="form-control" required>
+                <label for="user_email" class="form-label">Email</label> <!-- 'email' modifié -->
+                <input type="email" name="user_email" id="user_email" class="form-control" required>
             </div>
             <div class="mb-3">
-                <label for="password" class="form-label">Mot de passe</label>
-                <input type="password" name="password" id="password" class="form-control" required>
+                <label for="user_password" class="form-label">Mot de passe</label> <!-- 'password' modifié -->
+                <input type="password" name="user_password" id="user_password" class="form-control" required>
             </div>
-            <button type="submit" class="btn btn-primary w-100">S'inscrire</button>
+            <button type="submit" class="btn btn-success w-100">S'inscrire</button> <!-- Changer la couleur du bouton -->
         </form>
 
         <div class="text-center mt-3">

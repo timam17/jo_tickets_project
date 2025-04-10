@@ -1,0 +1,30 @@
+# Node.js
+node_modules/
+
+# Logs
+*.log
+
+# Système d'exploitation
+.DS_Store
+
+# Fichiers d'éditeur
+.vscode/
+.idea/
+
+# Fichiers générés
+/dist/
+/build/
+
+# Environnement local
+.env
+
+# Fichiers de dépendances spécifiques à l'éditeur ou à la plateforme
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Dossiers spécifiques aux tests
+coverage/
+
+# Dossiers de cache de dépendances
+/.cache

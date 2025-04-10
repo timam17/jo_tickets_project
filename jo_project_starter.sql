@@ -29,18 +29,18 @@ SET time_zone = "+00:00";
 
 DROP TABLE IF EXISTS `mainapp_event`;
 CREATE TABLE IF NOT EXISTS `mainapp_event` (
-  `id` bigint NOT NULL AUTO_INCREMENT,
-  `start` datetime(6) NOT NULL,
-  `stadium_id` bigint NOT NULL,
-  `team_away_id` bigint DEFAULT NULL,
-  `team_home_id` bigint DEFAULT NULL,
-  `score` varchar(10) DEFAULT NULL,
-  `winner_id` bigint DEFAULT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `start` DATETIME(6) NOT NULL,
+  `stadium_id` BIGINT NOT NULL,
+  `team_away_id` BIGINT DEFAULT NULL,
+  `team_home_id` BIGINT DEFAULT NULL,
+  `score` VARCHAR(10) DEFAULT NULL,
+  `winner_id` BIGINT DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `mainapp_event_stadium_id_d1eea8c6` (`stadium_id`),
-  KEY `mainapp_event_team_away_id_58df9724` (`team_away_id`),
-  KEY `mainapp_event_team_home_id_a855bb28` (`team_home_id`),
-  KEY `mainapp_event_winner_id_3bb46005` (`winner_id`)
+  KEY `mainapp_event_stadium_id_idx` (`stadium_id`),
+  KEY `mainapp_event_team_away_idx` (`team_away_id`),
+  KEY `mainapp_event_team_home_idx` (`team_home_id`),
+  KEY `mainapp_event_winner_idx` (`winner_id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
@@ -72,9 +72,9 @@ INSERT INTO `mainapp_event` (`id`, `start`, `stadium_id`, `team_away_id`, `team_
 
 DROP TABLE IF EXISTS `mainapp_stadium`;
 CREATE TABLE IF NOT EXISTS `mainapp_stadium` (
-  `id` bigint NOT NULL AUTO_INCREMENT,
-  `name` varchar(100) NOT NULL,
-  `location` varchar(100) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(100) NOT NULL,
+  `location` VARCHAR(100) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
@@ -99,10 +99,10 @@ INSERT INTO `mainapp_stadium` (`id`, `name`, `location`) VALUES
 
 DROP TABLE IF EXISTS `mainapp_team`;
 CREATE TABLE IF NOT EXISTS `mainapp_team` (
-  `id` bigint NOT NULL AUTO_INCREMENT,
-  `name` varchar(100) NOT NULL,
-  `nickname` varchar(100) NOT NULL,
-  `code` varchar(3) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(100) NOT NULL,
+  `nickname` VARCHAR(100) NOT NULL,
+  `code` VARCHAR(3) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
@@ -128,38 +128,47 @@ INSERT INTO `mainapp_team` (`id`, `name`, `nickname`, `code`) VALUES
 (2, 'États-Unis', 'Team USA', 'US'),
 (1, 'France', 'Les Bleus', 'FR');
 
+--
 
-
+-- Table des utilisateurs d'authentification
 CREATE TABLE IF NOT EXISTS `auth_user` (
-  `id` bigint NOT NULL AUTO_INCREMENT,
-  `username` varchar(150) NOT NULL UNIQUE,
-  `email` varchar(254) NOT NULL UNIQUE,
-  `password` varchar(128) NOT NULL,
-  `is_superuser` boolean NOT NULL DEFAULT 0,
-  `is_active` boolean NOT NULL DEFAULT 1,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `username` VARCHAR(150) NOT NULL UNIQUE,
+  `email` VARCHAR(254) NOT NULL UNIQUE,
+  `password` VARCHAR(128) NOT NULL,
+  `is_superuser` BOOLEAN NOT NULL DEFAULT 0,
+  `is_active` BOOLEAN NOT NULL DEFAULT 1,
   PRIMARY KEY (`id`)
 );
 
+-- --------------------------------------------------------
+
+-- Structure de la table `mainapp_ticket`
+--
 
 CREATE TABLE IF NOT EXISTS `mainapp_ticket` (
-  `id` bigint NOT NULL AUTO_INCREMENT,
-  `event_id` bigint NOT NULL,
-  `user_id` bigint NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `event_id` BIGINT NOT NULL,
+  `user_id` BIGINT NOT NULL,
   `category` ENUM('Silver', 'Gold', 'Platinum') NOT NULL,
   `price` DECIMAL(10,2) NOT NULL,
-  `qr_code` varchar(255) NOT NULL,  -- Stockera le chemin du QR Code généré
-  `used` boolean NOT NULL DEFAULT 0, -- Indique si le billet a été scanné
+  `qr_code` VARCHAR(255) NOT NULL,  -- Stocke le chemin du QR Code généré
+  `used` BOOLEAN NOT NULL DEFAULT 0, -- Indique si le billet a été scanné
   PRIMARY KEY (`id`),
   FOREIGN KEY (`event_id`) REFERENCES `mainapp_event` (`id`),
   FOREIGN KEY (`user_id`) REFERENCES `auth_user` (`id`)
 );
 
+-- --------------------------------------------------------
+
+-- Structure de la table `mainapp_ticket_scan`
+--
 
 CREATE TABLE IF NOT EXISTS `mainapp_ticket_scan` (
-  `id` bigint NOT NULL AUTO_INCREMENT,
-  `ticket_id` bigint NOT NULL,
-  `scanned_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `scanner_id` bigint NOT NULL,  -- L'ID de l'agent/stadier
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `ticket_id` BIGINT NOT NULL,
+  `scanned_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `scanner_id` BIGINT NOT NULL,  -- L'ID de l'agent/stadier
   PRIMARY KEY (`id`),
   FOREIGN KEY (`ticket_id`) REFERENCES `mainapp_ticket` (`id`),
   FOREIGN KEY (`scanner_id`) REFERENCES `auth_user` (`id`)

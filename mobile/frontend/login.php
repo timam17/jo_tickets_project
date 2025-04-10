@@ -1,61 +1,56 @@
 <?php
 include_once '../include/header.php';
-$message = '';
+$login_message = '';  // Renommer $message en $login_message
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $email = trim($_POST['email']);
-    $password = trim($_POST['password']);
+    $user_email = trim($_POST['email']);  // Renommer $email en $user_email
+    $user_password = trim($_POST['password']);  // Renommer $password en $user_password
 
-    if (empty($email) || empty($password)) {
-        $message = "Tous les champs sont obligatoires.";
+    if (empty($user_email) || empty($user_password)) {
+        $login_message = "Veuillez remplir tous les champs.";  // Modifié le message d'erreur
     } else {
-        $url = 'http://localhost:3000/login';
+        $api_url = 'http://localhost:3000/login';  // Renommer $url en $api_url
 
-        $data = json_encode([
-            "email" => $email,
-            "password" => $password
+        $credentials = json_encode([  // Renommer $data en $credentials
+            "email" => $user_email,
+            "password" => $user_password
         ]);
 
-        $ch = curl_init($url);
+        $ch = curl_init($api_url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
         curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $credentials);
 
         $response = curl_exec($ch);
         $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
 
         if ($http_code == 200) {
-            $responseData = json_decode($response, true);
+            $response_data = json_decode($response, true);  // Renommer $responseData en $response_data
 
-            // Vérifiez si le token existe dans la réponse
-            if (isset($responseData['token'])) {
-                // Stockez le token dans la session
-                $_SESSION['token'] = $responseData['token'];
+            if (isset($response_data['token'])) {
+                $_SESSION['token'] = $response_data['token'];
             }
 
-            // Assurez-vous que la réponse contient un champ 'user' avec les informations
-            if (isset($responseData['user']['username'])) {
-                $_SESSION['user'] = $responseData['user']['username'];
-            } elseif (isset($responseData['user']['name'])) {
-                $_SESSION['user'] = $responseData['user']['name'];
-            } elseif (isset($responseData['user']['email'])) {
-                $_SESSION['user'] = $responseData['user']['email']; // Fallback si aucun nom
+            if (isset($response_data['user']['username'])) {
+                $_SESSION['user'] = $response_data['user']['username'];
+            } elseif (isset($response_data['user']['name'])) {
+                $_SESSION['user'] = $response_data['user']['name'];
+            } elseif (isset($response_data['user']['email'])) {
+                $_SESSION['user'] = $response_data['user']['email'];  // Fallback pour l'email
             } else {
-                $_SESSION['user'] = $email; // Dernier recours
+                $_SESSION['user'] = $user_email;  // Dernière solution
             }
 
-            // Stockez l'ID de l'utilisateur dans la session
-            if (isset($responseData['user']['id'])) {
-                $_SESSION['user_id'] = $responseData['user']['id'];
+            if (isset($response_data['user']['id'])) {
+                $_SESSION['user_id'] = $response_data['user']['id'];
             }
 
-            // Redirection vers la page d'accueil après une connexion réussie
-            header("Location: index.php");
+            header("Location: dashboard.php");  // Rediriger vers une autre page après la connexion
             exit();
         } else {
-            $message = "Identifiants incorrects ou erreur de connexion.";
+            $login_message = "Erreur de connexion ou identifiants incorrects.";  // Nouveau message d'erreur
         }
     }
 }
@@ -72,24 +67,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <body>
 <div class="d-flex justify-content-center align-items-center vh-100">
     <div class="card p-4" style="width: 350px;">
-        <h2 class="text-center">Connexion</h2>
-        <?php if ($message): ?>
-            <div class="alert alert-danger"><?= htmlspecialchars($message) ?></div>
+        <h2 class="text-center text-primary">Se connecter</h2>  <!-- Changer le titre -->
+        <?php if ($login_message): ?>
+            <div class="alert alert-danger"><?= htmlspecialchars($login_message) ?></div>  <!-- Changer l'affichage du message -->
         <?php endif; ?>
         <form method="POST">
             <div class="mb-3">
-                <label for="email" class="form-label">Email</label>
+                <label for="email" class="form-label">Adresse email</label>  <!-- Changer le libellé -->
                 <input type="email" name="email" id="email" class="form-control" required>
             </div>
             <div class="mb-3">
-                <label for="password" class="form-label">Mot de passe</label>
+                <label for="password" class="form-label">Mot de passe</label>  <!-- Changer le libellé -->
                 <input type="password" name="password" id="password" class="form-control" required>
             </div>
-            <button type="submit" class="btn btn-primary w-100">Se connecter</button>
+            <button type="submit" class="btn btn-primary w-100">Connexion</button>  <!-- Changer le texte du bouton -->
         </form>
 
         <div class="text-center mt-3">
-            <a href="register.php">Je n'ai pas encore de compte, je m'inscris</a>
+            <a href="register.php">Pas encore de compte ? Inscrivez-vous ici.</a>  <!-- Texte modifié -->
         </div>
     </div>
 </div>

@@ -3,30 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scanner QR Code</title>
+    <title>Scanner de Billets - JO 2024</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f1f1f1;
+            color: #333;
             text-align: center;
             margin: 20px;
         }
         video {
             width: 100%;
-            max-width: 400px;
+            max-width: 500px;
+            border: 3px solid #4CAF50;
             margin-top: 20px;
         }
         #qr-result {
-            margin-top: 20px;
+            margin-top: 30px;
             font-weight: bold;
-            color: green;
+            color: #4CAF50;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            cursor: pointer;
+            font-size: 18px;
+            border-radius: 6px;
+            margin: 10px;
+        }
+        button:disabled {
+            background-color: #ccc;
         }
     </style>
 </head>
 <body>
 
-    <h1>Scanner un QR Code</h1>
-    <button id="start-scan">Démarrer le scan</button>
-    <button id="stop-scan" disabled>Arrêter le scan</button>
+    <h1>Scanner Votre Billet pour les JO 2024</h1>
+    <p>Scannez le QR code sur votre billet pour accéder à l'événement et vérifier sa validité !</p>
+    <button id="start-scan">Commencer la Scan</button>
+    <button id="stop-scan" disabled>Arrêter le Scan</button>
     <br>
     <video id="video" autoplay playsinline></video>
     <canvas id="canvas" style="display: none;"></canvas>
@@ -35,63 +52,63 @@
     <script src="https://cdn.jsdelivr.net/npm/jsqr/dist/jsQR.js"></script>
 
     <script>
-        const video = document.getElementById('video');
-        const canvas = document.getElementById('canvas');
-        const context = canvas.getContext('2d');
-        const startBtn = document.getElementById('start-scan');
-        const stopBtn = document.getElementById('stop-scan');
+        const videoElement = document.getElementById('video');
+        const canvasElement = document.getElementById('canvas');
+        const canvasContext = canvasElement.getContext('2d');
+        const startScanBtn = document.getElementById('start-scan');
+        const stopScanBtn = document.getElementById('stop-scan');
         const resultDisplay = document.getElementById('qr-result');
 
-        let stream = null;
-        let scanning = false;
+        let videoStream = null;
+        let isScanning = false;
 
-        startBtn.addEventListener('click', async () => {
+        startScanBtn.addEventListener('click', async () => {
             try {
-                stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
-                video.srcObject = stream;
-                scanning = true;
-                startBtn.disabled = true;
-                stopBtn.disabled = false;
+                videoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+                videoElement.srcObject = videoStream;
+                isScanning = true;
+                startScanBtn.disabled = true;
+                stopScanBtn.disabled = false;
                 resultDisplay.textContent = "";
 
-                requestAnimationFrame(scan);
+                requestAnimationFrame(scanQRCode);
             } catch (err) {
                 console.error("Erreur d'accès à la caméra: ", err);
-                alert("Impossible d'accéder à la caméra.");
+                alert("Impossible d'accéder à la caméra. Veuillez réessayer.");
             }
         });
 
-        stopBtn.addEventListener('click', () => {
+        stopScanBtn.addEventListener('click', () => {
             stopScan();
         });
 
         function stopScan() {
-            scanning = false;
-            startBtn.disabled = false;
-            stopBtn.disabled = true;
-            if (stream) {
-                stream.getTracks().forEach(track => track.stop());
-                video.srcObject = null;
+            isScanning = false;
+            startScanBtn.disabled = false;
+            stopScanBtn.disabled = true;
+            if (videoStream) {
+                videoStream.getTracks().forEach(track => track.stop());
+                videoElement.srcObject = null;
             }
         }
 
-        function scan() {
-            if (!scanning) return;
+        function scanQRCode() {
+            if (!isScanning) return;
 
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            canvasElement.width = videoElement.videoWidth;
+            canvasElement.height = videoElement.videoHeight;
+            canvasContext.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
 
-            const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-            const qrCode = jsQR(imageData.data, canvas.width, canvas.height);
+            const imageData = canvasContext.getImageData(0, 0, canvasElement.width, canvasElement.height);
+            const qrCode = jsQR(imageData.data, canvasElement.width, canvasElement.height);
 
             if (qrCode) {
-                resultDisplay.textContent = `QR Code détecté : ${qrCode.data}`;
-                stopScan(); // Stoppe le scan après détection
+                resultDisplay.textContent = `Billet valide détecté ! Détails : ${qrCode.data}`;
+                stopScan(); // Arrête le scan après détection
                 return;
             }
 
-            requestAnimationFrame(scan);
+            requestAnimationFrame(scanQRCode);
         }
     </script>
 

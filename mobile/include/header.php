@@ -1,4 +1,4 @@
-<?php
+<?php 
 session_start(); 
 
 $user = $_SESSION['user'] ?? null;
@@ -8,7 +8,6 @@ if (isset($_SESSION['token'])) {
     $token = $_SESSION['token'];
 }
 ?>
-
 
 <!DOCTYPE html>
 <html lang="fr">
@@ -48,7 +47,6 @@ if (isset($_SESSION['token'])) {
         .custom-btn-night:active {
             background-color: rgb(13, 27, 42); /* rouge lors du clic */
         }
-
 
         @media (max-width: 767px) {
             .navbar-brand img {
