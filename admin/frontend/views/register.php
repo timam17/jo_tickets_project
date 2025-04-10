@@ -3,9 +3,9 @@ session_start(); // Démarrer la session
 
 include '../../backend/db/db.php'; // Assurez-vous que le chemin est correct
 
-// Vérifier si $pdo est défini et est un objet PDO valide
+// Vérification de la connexion à la base de données
 if (!$pdo) {
-    die("Échec de la connexion à la base de données.");
+    die("Impossible de se connecter à la base de données.");
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -17,31 +17,31 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     try {
         // Vérifier si l'utilisateur existe déjà
         $sql = "SELECT * FROM auth_user WHERE username = :username OR email = :email";
-        $stmt = $pdo->prepare($sql); // Utiliser $pdo ici au lieu de $conn
+        $stmt = $pdo->prepare($sql);
         $stmt->bindParam(':username', $username, PDO::PARAM_STR);
         $stmt->bindParam(':email', $email, PDO::PARAM_STR);
         $stmt->execute();
         
         if ($stmt->rowCount() > 0) {
-            echo "L'utilisateur existe déjà.";
+            echo "Ce nom d'utilisateur ou cet email est déjà utilisé.";
         } else {
-            // Insérer un nouvel utilisateur (administrateur)
+            // Insérer le nouvel utilisateur (administrateur)
             $sql = "INSERT INTO auth_user (username, email, password, is_superuser, is_active) VALUES (:username, :email, :password, 1, 1)";
-            $stmt = $pdo->prepare($sql); // Utiliser $pdo ici au lieu de $conn
+            $stmt = $pdo->prepare($sql);
             $stmt->bindParam(':username', $username, PDO::PARAM_STR);
             $stmt->bindParam(':email', $email, PDO::PARAM_STR);
             $stmt->bindParam(':password', $hashed_password, PDO::PARAM_STR);
 
             if ($stmt->execute()) {
-                // L'inscription a réussi, ouvrir la session et rediriger
+                // Inscription réussie, ouvrir la session et rediriger
                 $_SESSION['username'] = $username; // Définir la variable de session
-                $_SESSION['email'] = $email; // Vous pouvez aussi stocker l'email si nécessaire
+                $_SESSION['email'] = $email; // Optionnel : enregistrer l'email
 
-                // Rediriger vers la page index.php
+                // Rediriger vers la page d'accueil
                 header("Location: index.php");
-                exit(); // Terminer l'exécution du script après la redirection
+                exit(); // Terminer l'exécution après la redirection
             } else {
-                echo "Erreur lors de l'inscription.";
+                echo "Une erreur est survenue lors de l'inscription.";
             }
         }
     } catch (PDOException $e) {
@@ -57,50 +57,66 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inscription Administrateur</title>
     <style>
-        a{
-            display: flex;
-            justify-content: center;
-            margin-top: 20px;
-            text-decoration: none;
-            color: #007BFF;
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f7f7f7;
         }
-        form {
+        .form-container {
             max-width: 400px;
             margin: 0 auto;
-            padding: 1em;
-            border: 1px solid #ccc;
-            border-radius: 5px;
+            padding: 20px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
         }
-        label, input, button {
-            display: block;
+        .form-container label,
+        .form-container input,
+        .form-container button {
             width: 100%;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
         }
-        button {
-            background-color: #007BFF;
+        .form-container button {
+            background-color: #28a745;
             color: white;
             border: none;
-            padding: 10px;
+            padding: 12px;
             cursor: pointer;
         }
-        button:hover {
-            background-color: #0056b3;
+        .form-container button:hover {
+            background-color: #218838;
+        }
+        .form-container a {
+            display: block;
+            text-align: center;
+            color: #007BFF;
+            text-decoration: none;
+        }
+        .form-container a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
+
+<div class="form-container">
+    <h2>Créer un compte Administrateur</h2>
     <form method="POST">
-        <label for="username">Nom d'utilisateur:</label>
-        <input type="text" name="username" required>
+        <label for="username">Nom d'utilisateur :</label>
+        <input type="text" id="username" name="username" required>
 
-        <label for="email">E-mail:</label>
-        <input type="email" name="email" required>
+        <label for="email">E-mail :</label>
+        <input type="email" id="email" name="email" required>
 
-        <label for="password">Mot de passe:</label>
-        <input type="password" name="password" required>
+        <label for="password">Mot de passe :</label>
+        <input type="password" id="password" name="password" required>
 
         <button type="submit">S'inscrire</button>
     </form>
-    <a href="login.php">Déjà inscrit, je me connecte.</a>
+    <a href="login.php">Déjà inscrit ? Connectez-vous ici.</a>
+</div>
+
 </body>
 </html>

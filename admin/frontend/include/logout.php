@@ -1,6 +1,10 @@
 <?php
 session_start();
-session_destroy(); // Supprime toutes les données de session
+if (isset($_SESSION)) {
+    session_unset(); // Libère toutes les variables de session
+    session_destroy(); // Termine la session
+}
 header("Location: ../views/login.php"); // Redirige vers la page de connexion
 exit();
 ?>
+

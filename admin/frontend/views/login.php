@@ -3,42 +3,42 @@ session_start(); // Démarrer la session
 
 include '../../backend/db/db.php'; // Assurez-vous que le chemin est correct
 
-// Vérifier si $pdo est défini et est un objet PDO valide
+// Vérification de la connexion à la base de données
 if (!$pdo) {
-    die("Échec de la connexion à la base de données.");
+    die("Erreur de connexion à la base de données.");
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $username_or_email = $_POST['username_or_email']; // Utiliser un seul champ pour le nom d'utilisateur ou l'email
+    $login = $_POST['login']; // Utiliser un champ pour le nom d'utilisateur ou l'email
     $password = $_POST['password'];
 
     try {
-        // Vérifier si l'utilisateur existe avec le nom d'utilisateur ou l'email
-        $sql = "SELECT * FROM auth_user WHERE username = :username_or_email OR email = :username_or_email";
-        $stmt = $pdo->prepare($sql); // Utiliser $pdo ici au lieu de $conn
-        $stmt->bindParam(':username_or_email', $username_or_email, PDO::PARAM_STR);
+        // Rechercher l'utilisateur par nom d'utilisateur ou email
+        $sql = "SELECT * FROM auth_user WHERE username = :login OR email = :login";
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindParam(':login', $login, PDO::PARAM_STR);
         $stmt->execute();
 
         if ($stmt->rowCount() > 0) {
-            // Utilisateur trouvé
+            // L'utilisateur est trouvé
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
             // Vérifier si le mot de passe correspond
             if (password_verify($password, $user['password'])) {
-                // Le mot de passe est correct, démarrer la session
+                // Mot de passe correct, démarrer la session
                 $_SESSION['username'] = $user['username'];
                 $_SESSION['email'] = $user['email'];
 
-                // Rediriger vers la page d'accueil ou dashboard
-                header("Location: index.php");
-                exit(); // Terminer l'exécution du script après la redirection
+                // Rediriger vers la page d'accueil ou tableau de bord
+                header("Location: dashboard.php");
+                exit(); // Terminer l'exécution après la redirection
             } else {
-                echo "Le mot de passe est incorrect.";
+                echo "Mot de passe incorrect.";
             }
         } else {
-            echo "Aucun utilisateur trouvé avec ce nom d'utilisateur ou email.";
+            echo "Aucun utilisateur trouvé avec ce nom ou email.";
         }
     } catch (PDOException $e) {
-        echo "Erreur : " . $e->getMessage();
+        echo "Erreur de connexion à la base de données : " . $e->getMessage();
     }
 }
 ?>
@@ -48,49 +48,65 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connexion</title>
+    <title>Connexion utilisateur</title>
     <style>
-        a {
-            display: flex;
-            justify-content: center;
-            margin-top: 20px;
-            text-decoration: none;
-            color: #007BFF;
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f9;
         }
-        form {
-            max-width: 400px;
+        .form-container {
+            max-width: 350px;
             margin: 0 auto;
-            padding: 1em;
+            padding: 20px;
+            background-color: #fff;
             border: 1px solid #ccc;
-            border-radius: 5px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
-        label, input, button {
-            display: block;
+        .form-container label,
+        .form-container input,
+        .form-container button {
             width: 100%;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
         }
-        button {
-            background-color: #007BFF;
+        .form-container button {
+            background-color: #28a745;
             color: white;
             border: none;
-            padding: 10px;
+            padding: 12px;
             cursor: pointer;
         }
-        button:hover {
-            background-color: #0056b3;
+        .form-container button:hover {
+            background-color: #218838;
+        }
+        .form-container a {
+            display: block;
+            text-align: center;
+            color: #007BFF;
+            text-decoration: none;
+        }
+        .form-container a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
+
+<div class="form-container">
+    <h2>Se connecter</h2>
     <form method="POST">
-        <label for="username_or_email">Nom d'utilisateur ou E-mail:</label>
-        <input type="text" name="username_or_email" required>
+        <label for="login">Nom d'utilisateur ou E-mail :</label>
+        <input type="text" id="login" name="login" required>
 
-        <label for="password">Mot de passe:</label>
-        <input type="password" name="password" required>
+        <label for="password">Mot de passe :</label>
+        <input type="password" id="password" name="password" required>
 
-        <button type="submit">Se connecter</button>
+        <button type="submit">Connexion</button>
     </form>
-    <a href="register.php">Pas encore inscrit, je m'inscris.</a>
+    <a href="register.php">Pas encore inscrit ? Créez un compte ici.</a>
+</div>
+
 </body>
 </html>

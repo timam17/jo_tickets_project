@@ -1,12 +1,11 @@
 <?php
 session_start();
 
-// Vérifier si l'utilisateur est connecté
+// Vérification de la session utilisateur
 if (!isset($_SESSION['username'])) {
     header("Location: login.php"); // Redirige vers la page de connexion si non connecté
     exit();
 }
-
 ?>
 
 <!DOCTYPE html>
@@ -28,7 +27,7 @@ if (!isset($_SESSION['username'])) {
             font-weight: bold;
         }
         .logout-button {
-            background-color: red;
+            background-color: #D9534F; /* Couleur rouge légèrement modifiée */
             color: white;
             border: none;
             padding: 10px 15px;
@@ -37,7 +36,7 @@ if (!isset($_SESSION['username'])) {
             border-radius: 5px;
         }
         .logout-button:hover {
-            background-color: darkred;
+            background-color: #C9302C; /* Rouge plus foncé au hover */
         }
     </style>
 </head>

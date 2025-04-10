@@ -4,10 +4,10 @@ include '../../backend/db/db.php'; // Connexion à la base de données
 
 // Vérifier la connexion à la base de données
 if (!$pdo) {
-    die("Échec de la connexion à la base de données.");
+    die("Impossible de se connecter à la base de données.");
 }
 
-// Récupérer la liste des matchs avec les détails des équipes et des stades
+// Récupérer les matchs avec les détails des équipes et stades
 $sql = "SELECT e.id, e.start, s.name AS stadium, s.location, 
                t1.id AS home_team_id, t1.name AS home_team, 
                t2.id AS away_team_id, t2.name AS away_team, 
@@ -23,7 +23,7 @@ $stmt = $pdo->prepare($sql);
 $stmt->execute();
 $matches = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Mise à jour des résultats
+// Mise à jour des résultats si formulaire soumis
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $match_id = $_POST['match_id'];
     $score = $_POST['score'];
@@ -35,23 +35,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $update_stmt->bindParam(':score', $score, PDO::PARAM_STR);
     $update_stmt->bindParam(':winner', $winner_id, PDO::PARAM_INT);
     $update_stmt->bindParam(':match_id', $match_id, PDO::PARAM_INT);
-    
+
     if ($update_stmt->execute()) {
         header("Location: index.php"); // Recharger la page après la mise à jour
         exit();
     } else {
-        echo "Erreur lors de la mise à jour du match.";
+        echo "Échec de la mise à jour du match.";
     }
 }
 
-// Récupérer la liste des équipes pour le menu déroulant
+// Récupérer les équipes pour le menu déroulant
 $team_sql = "SELECT id, name FROM mainapp_team";
 $team_stmt = $pdo->prepare($team_sql);
 $team_stmt->execute();
 $teams = $team_stmt->fetchAll(PDO::FETCH_ASSOC);
 
-
-function getMatchClass($date) {
+// Fonction pour déterminer la catégorie du match
+function categorizeMatch($date) {
     $quart_dates = ['2024-07-31', '2024-08-01'];
     $demi_dates = ['2024-08-04'];
     $finale_date = '2024-08-07';
@@ -69,19 +69,18 @@ function getMatchClass($date) {
 }
 ?>
 
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Administration des matchs</title>
+    <title>Gestion des matchs</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
             margin: 20px;
             padding: 20px;
-            background-color: #f4f4f4;
+            background-color: #f8f9fa;
         }
         table {
             width: 100%;
@@ -89,12 +88,12 @@ function getMatchClass($date) {
             background: white;
         }
         th, td {
-            border: 1px solid #ccc;
-            padding: 10px;
+            border: 1px solid #ddd;
+            padding: 12px;
             text-align: center;
         }
         th {
-            background: #007BFF;
+            background: #0056b3;
             color: white;
         }
         form {
@@ -104,7 +103,7 @@ function getMatchClass($date) {
             background-color: #28a745;
             color: white;
             border: none;
-            padding: 5px 10px;
+            padding: 6px 12px;
             cursor: pointer;
         }
         button:hover {
@@ -112,17 +111,17 @@ function getMatchClass($date) {
         }
 
         .quart {
-            background-color:rgba(231, 231, 231, 0.58);
+            background-color: rgba(231, 231, 231, 0.58);
             font-weight: bold;
         }
 
         .demi {
-            background-color:rgba(219, 210, 190, 0.52);
+            background-color: rgba(219, 210, 190, 0.52);
             font-weight: bold;
         }
 
         .finale {
-            background-color:rgba(255, 216, 157, 0.64);
+            background-color: rgba(255, 216, 157, 0.64);
             font-weight: bold;
             font-size: 1.1em;
         }
@@ -131,14 +130,14 @@ function getMatchClass($date) {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 5px;
+            gap: 8px;
         }
 
         .actions input, 
         .actions select, 
         .actions button {
             width: 100%;
-            padding: 8px;
+            padding: 10px;
             border-radius: 5px;
             border: 1px solid #ccc;
             font-size: 14px;
@@ -149,14 +148,11 @@ function getMatchClass($date) {
             color: white;
             font-weight: bold;
             cursor: pointer;
-            transition: background 0.3s;
         }
 
         .actions button:hover {
             background-color: #218838;
         }
-
-
     </style>
 </head>
 <body>
@@ -172,21 +168,20 @@ function getMatchClass($date) {
         <th>Actions</th>
     </tr>
     <?php foreach ($matches as $match): ?>
-    <tr class="<?= getMatchClass($match['start']) ?>">
+    <tr class="<?= categorizeMatch($match['start']) ?>">
         <td><?= date("d/m/Y H:i", strtotime($match['start'])) ?></td>
         <td><?= $match['stadium'] ?> (<?= $match['location'] ?>)</td>
-        <td><?= $match['home_team'] ?? "?" ?></td>
-        <td><?= $match['away_team'] ?? "?" ?></td>
-        <td><?= $match['score'] ?? "?" ?></td>
-        <td><?= $match['winner'] ?? "?" ?></td>
+        <td><?= $match['home_team'] ?? "Non spécifié" ?></td>
+        <td><?= $match['away_team'] ?? "Non spécifié" ?></td>
+        <td><?= $match['score'] ?? "Non défini" ?></td>
+        <td><?= $match['winner'] ?? "Aucun" ?></td>
         <td class="actions">
             <form method="POST" class="actions">
                 <input type="hidden" name="match_id" value="<?= $match['id'] ?>">
-                <input type="text" name="score" placeholder="Ex: 2-1" required>
+                <input type="text" name="score" placeholder="Score Ex: 2-1" required>
                 
-                <!-- Sélectionner le gagnant parmi les équipes de ce match -->
                 <select name="winner" required>
-                    <option value="">Choisir le gagnant</option>
+                    <option value="">Sélectionner le gagnant</option>
                     <option value="<?= $match['home_team_id'] ?>"><?= $match['home_team'] ?></option>
                     <option value="<?= $match['away_team_id'] ?>"><?= $match['away_team'] ?></option>
                 </select>
